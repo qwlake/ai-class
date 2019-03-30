@@ -2,6 +2,7 @@ package main;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,22 +10,48 @@ public class main {
 	
 	static int features = 21;
 	static int output = 3;
+	static int hidden = 3;
 
 	public static void main(String[] args) {
-		
+
+		// Hyper parameters
+		int epochs = 100;
+		int trainSize = 0;
+		double learningRate = 0.1;
+
 		dataRead dr = new dataRead(features, output);
-		LinkedList<double[]> train = dr.readexcel();	// mat 2126
+		LinkedList<double[]> train = dr.readexcel(); // train [2126, 24]
 		ArrayList<double[]> test = new ArrayList<double[]>();
-		randomSelect(train, test);	// mat 1701, test 425, features 21
+		randomSelect(train, test); // train [1701, 24], test [425, 24]
 
 		double[][] trainX = toMatrix(train);
-		double[][] trainY = xySplit(trainX);
+		double[][] trainY = xySplit(trainX); // trainX [1701, 21], trainY [1701, 3]
 		double[][] testX = toMatrix(test);
-		double[][] testY = xySplit(testX);
-		
-		network nw = new network(features, features, output);
-		double[][] y = nw.predict(trainX);
-		nw.meanSquared(y, trainY);
+		double[][] testY = xySplit(testX); // testX [425, 21], testY [425, 3]
+
+		double[] lossList = new double[epochs];
+		double[] accuracyList = new double[epochs];
+		network network = new network(features, hidden, output);
+
+		for (int i = 0; i < epochs; i++) {
+			// Forward
+			accuracyList[i] = network.accuracy(trainX, trainY);
+			
+			// Calculate gradient
+			LinkedHashMap<String, double[][]> grad = network.gradient(trainX, trainY);
+
+			// Update parameters
+			for (String key : grad.keySet())
+				network.updateParameter(key, grad.get(key), learningRate);
+
+			// Record
+			double loss = network.loss(trainX, trainY);
+			lossList[i] = loss;
+		}
+		for (int i = 0; i < epochs; i++) {
+			System.out.println(lossList[i]);
+		}
+		graph(lossList);
 	}
 	
 	public static double[][] xySplit(double[][] x) {
