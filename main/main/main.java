@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jfree.ui.RefineryUtilities;
+
 public class main {
 	
 	static int features = 21;
@@ -52,6 +54,13 @@ public class main {
 			System.out.println(lossList[i]);
 		}
 		graph(lossList);
+	}
+	
+	public static void graph(double[] list) {
+		graph g = new graph("FNN loss changes", list);
+        g.pack();
+        RefineryUtilities.centerFrameOnScreen(g);
+        g.setVisible(true);
 	}
 	
 	public static double[][] xySplit(double[][] x) {

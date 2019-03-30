@@ -97,12 +97,36 @@ public class network {
 		return a;
 	}
 	
+	public void updateParameter(String key, double[][] grad, double learningRate) {
+		double[][] p = params.get(key);
+		for (int i = 0; i < p.length; i++)
+			for (int j = 0; j < p[0].length; j++)
+				p[i][j] -= learningRate * grad[i][j];
+		params.replace(key, p);
+	}
+	
 	public double meanSquared(double[][] y, double[][] t) {
 		double sum = 0;
 		for (int i = 0; i < y.length; i++)
 			for (int j = 0; j < y[0].length; j++)
 				sum += Math.pow(y[i][j]-t[i][j], 2);
 		return 0.5 * sum;
+	}
+	
+	public double[] softmax(double[] x) {
+		double[] y = new double[x.length];
+		double max = 0.;
+		double sum = 0.;
+		for (int i = 0; i < x.length; i++)
+			if (max < x[i])
+				max = x[i]; // to prevent overflow
+		for (int i = 0; i < x.length; i++) {
+			y[i] = Math.exp(x[i] - max);
+			sum += y[i];
+		}
+		for (int i = 0; i < x.length; i++)
+			y[i] /= sum;
+		return y;
 	}
 	
 	public void sigmoid(double[][] x) {
