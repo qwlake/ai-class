@@ -16,9 +16,7 @@ public class main {
 		LinkedList<double[]> train = dr.readexcel();	// mat 2126
 		ArrayList<double[]> test = new ArrayList<double[]>();
 		randomSelect(train, test);	// mat 1701, test 425, features 21
-		
 
-		
 		double[][] trainX = toMatrix(train);
 		double[][] trainY = xySplit(trainX);
 		double[][] testX = toMatrix(test);
