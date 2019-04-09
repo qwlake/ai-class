@@ -28,25 +28,27 @@ public class network {
 			for (int j = 0; j < w2[0].length; j++)
 				w2[i][j] = wtConst * r.nextGaussian();
 		for (int i = 0; i < b1[0].length; i++)
-			b1[0][i] = 0;
+			b1[0][i] = 1;
 		for (int i = 0; i < b2[0].length; i++)
-			b2[0][i] = 0;
-		params.put("w1", w1);
-		params.put("b1", b1);
-		params.put("w2", w2);
-		params.put("b2", b2);
+			b2[0][i] = 1;
+		params.put("w1", w1);	// weight1
+		params.put("b1", b1);	// bias1
+		params.put("w2", w2);	// weight2
+		params.put("b2", b2);	// bias2
 	}
 	
 	public double[][] predict(double[][] x) {
 		double[][] a1 = dot(x, params.get("w1"), params.get("b1"));
 		sigmoid(a1);
+		params.put("h1", a1.clone());
 		double[][] a2 = dot(a1, params.get("w2"), params.get("b2"));
 		sigmoid(a2);
+		params.put("r", a2.clone());	// result
 		return a2;
 	}
 	
 	public double loss(double[][] x, double[][] t) {
-		double[][] y = predict(x);
+		double[][] y = params.get("r");
 		return meanSquared(y, t);
 	}
 	
@@ -59,12 +61,14 @@ public class network {
 		return (double)cnt/y.length;
 	}
 	
-	public LinkedHashMap<String, double[][]> gradient(double[][] x, double[][] t) {
+	public LinkedHashMap<String, double[][]> gradient(double[][] x, double[][] t, double learningRate) {
 		LinkedHashMap<String, double[][]> grads = new LinkedHashMap<String, double[][]>();
-		grads.put("w1", differential(x,t));
-		grads.put("w1", differential(x,t));
-		grads.put("b2", differential(x,t));
-		grads.put("b2", differential(x,t));
+		double[][] h1 = params.get("h1");
+		grads.put("w2", differential(params.get("r"),t));
+		updateParameter("w2", grads.get("w2"), learningRate);
+		predict(x);
+		grads.put("w1", differential(h1, params.get("h1")));
+		updateParameter("w1", grads.get("w1"), learningRate);
 		return grads;
 	}
 	
@@ -75,9 +79,9 @@ public class network {
 			for (int j = 0; j < x[0].length; j++) {
 				double temp = x[i][j];
 				x[i][j] = temp + h;
-				double fxh1 = loss(x, t);
+				double fxh1 = meanSquared(x, t);
 				x[i][j] = temp - h;
-				double fxh2 = loss(x, t);
+				double fxh2 = meanSquared(x, t);
 				grad[i][j] = (fxh1 - fxh2) / (2*h);
 				x[i][j] = temp;
 			}

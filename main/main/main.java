@@ -2,7 +2,6 @@ package main;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,14 +11,14 @@ public class main {
 	
 	static int features = 21;
 	static int output = 3;
-	static int hidden = 3;
+	static int hidden = 50;
 
 	public static void main(String[] args) {
 
 		// Hyper parameters
-		int epochs = 100;
+		int epochs = 200;
 		int trainSize = 0;
-		double learningRate = 0.1;
+		double learningRate = 0.2;
 
 		dataRead dr = new dataRead(features, output);
 		LinkedList<double[]> train = dr.readexcel(); // train [2126, 24]
@@ -39,12 +38,8 @@ public class main {
 			// Forward
 			accuracyList[i] = network.accuracy(trainX, trainY);
 			
-			// Calculate gradient
-			LinkedHashMap<String, double[][]> grad = network.gradient(trainX, trainY);
-
-			// Update parameters
-			for (String key : grad.keySet())
-				network.updateParameter(key, grad.get(key), learningRate);
+			// Calculate gradient and Update parameters
+			network.gradient(trainX, trainY, learningRate);
 
 			// Record
 			double loss = network.loss(trainX, trainY);
